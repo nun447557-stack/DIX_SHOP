@@ -871,8 +871,8 @@
             localStorage.setItem('dix_chats', JSON.stringify(chats));
             loadChatsList();
             
-            // Загружаем сообщения
-            loadAdminChatMessages(chatId);
+            // Загружаем сообщения из Firebase
+            loadMessagesFromFirebase(chatId);
         }
 
         function closeAdminChat() {
@@ -892,6 +892,74 @@
                 const isAdmin = msg.from === 'admin';
                 const isSystem = msg.from === 'system';
                 const isUser = msg.from === 'user';
+                
+                if (isSystem) {
+                    return `<div style="text-align: center; color: #888; font-size: 0.85rem; margin: 10px 0; padding: 10px; background: rgba(155, 48, 255, 0.1); border-radius: 10px;">${msg.text}</div>`;
+                }
+                
+                return `
+                    <div style="margin: 10px 0; text-align: ${isAdmin ? 'right' : 'left'};">
+                        <div style="display: inline-block; padding: 12px 18px; background: ${isAdmin ? 'linear-gradient(135deg, #00ff88, #00d4ff)' : 'rgba(255,255,255,0.1)'}; border-radius: ${isAdmin ? '20px 20px 0 20px' : '20px 20px 20px 0'}; color: #fff; max-width: 80%;">
+                            ${msg.text}
+                        </div>
+                        <div style="font-size: 0.75rem; color: #666; margin-top: 5px;">${new Date(msg.timestamp).toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'})}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('adminChatMessages').innerHTML = messagesHTML;
+            document.getElementById('adminChatMessages').scrollTop = document.getElementById('adminChatMessages').scrollHeight;
+        }
+
+        // Загрузка сообщений из Firebase
+        function loadMessagesFromFirebase(chatId) {
+            if (!window.firebaseReady || !window.db) {
+                // Если Firebase не готов - загружаем из localStorage
+                loadAdminChatMessages(chatId);
+                return;
+            }
+            
+            import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js")
+                .then(({ collection, query, where, onSnapshot, orderBy }) => {
+                    const q = query(
+                        collection(window.db, "messages"),
+                        where("chatId", "==", chatId),
+                        orderBy("timestamp", "asc")
+                    );
+                    
+                    // Слушаем сообщения в реальном времени
+                    onSnapshot(q, (snapshot) => {
+                        const messages = [];
+                        snapshot.forEach((doc) => {
+                            const data = doc.data();
+                            messages.push({
+                                from: data.from,
+                                text: data.text,
+                                timestamp: data.timestamp?.toDate().toISOString() || new Date().toISOString()
+                            });
+                        });
+                        
+                        // Сохраняем в localStorage для резерва
+                        const chats = JSON.parse(localStorage.getItem('dix_chats') || '[]');
+                        const chatIndex = chats.findIndex(c => c.id === chatId);
+                        if (chatIndex !== -1) {
+                            chats[chatIndex].messages = messages;
+                            localStorage.setItem('dix_chats', JSON.stringify(chats));
+                        }
+                        
+                        // Отображаем сообщения
+                        renderFirebaseMessages(messages);
+                    });
+                }).catch((error) => {
+                    console.error('Ошибка загрузки сообщений:', error);
+                    loadAdminChatMessages(chatId);
+                });
+        }
+
+        function renderFirebaseMessages(messages) {
+            const messagesHTML = messages.map(msg => {
+                const isAdmin = msg.from === 'admin';
+                const isSystem = msg.from === 'system';
                 
                 if (isSystem) {
                     return `<div style="text-align: center; color: #888; font-size: 0.85rem; margin: 10px 0; padding: 10px; background: rgba(155, 48, 255, 0.1); border-radius: 10px;">${msg.text}</div>`;
