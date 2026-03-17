@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 DIX_SHOP | Админ-панель</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #050505 0%, #1a0a2e 50%, #050505 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Анимированный фон */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .bg-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(155, 48, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(155, 48, 255, 0.1) 1px, transparent 1px);
+            background-size: 60px 60px;
+            opacity: 0.3;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-box {
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.95), rgba(26, 10, 46, 0.95));
+            border: 2px solid rgba(155, 48, 255, 0.5);
+            border-radius: 30px;
+            padding: 50px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 0 100px rgba(155, 48, 255, 0.3);
+        }
+
+        .login-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #9b30ff, #bf55ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(155, 48, 255, 0.3);
+            border-radius: 15px;
+            color: #fff;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: #9b30ff;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #9b30ff, #6a00ff);
+            border: none;
+            border-radius: 15px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 50px rgba(155, 48, 255, 0.6);
+        }
+
+        .error-msg {
+            color: #ff4d8d;
+            margin-top: 15px;
+            font-weight: 600;
+            display: none;
+        }
+
+        /* Admin Dashboard */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px;
+            background: rgba(155, 48, 255, 0.1);
+            border: 2px solid rgba(155, 48, 255, 0.3);
+            border-radius: 20px;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .logout-btn {
+            padding: 12px 30px;
+            background: rgba(255, 0, 100, 0.2);
+            border: 2px solid rgba(255, 0, 100, 0.5);
+            border-radius: 20px;
+            color: #ff4d8d;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 0, 100, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Вкладки */
+        .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            background: rgba(155, 48, 255, 0.1);
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px solid rgba(155, 48, 255, 0.3);
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 18px 25px;
+            background: rgba(155, 48, 255, 0.1);
+            border: 2px solid rgba(155, 48, 255, 0.3);
+            border-radius: 15px;
+            color: #888;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tab-btn:hover {
+            background: rgba(155, 48, 255, 0.2);
+            color: #fff;
+            transform: translateY(-3px);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #9b30ff, #6a00ff);
+            color: #fff;
+            border-color: #bf55ff;
+            box-shadow: 0 5px 20px rgba(155, 48, 255, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeInTab 0.4s ease-out;
+        }
+
+        @keyframes fadeInTab {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Улучшенные карточки статистики */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(155, 48, 255, 0.15), rgba(106, 0, 255, 0.1));
+            border: 2px solid rgba(155, 48, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(155, 48, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #bf55ff;
+            box-shadow: 0 10px 40px rgba(155, 48, 255, 0.4);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #bf55ff;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 1rem;
+        }
+
+        /* Tables */
+        .section {
+            background: rgba(155, 48, 255, 0.05);
+            border: 2px solid rgba(155, 48, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(155, 48, 255, 0.1);
+        }
+
+        .data-table th {
+            background: rgba(155, 48, 255, 0.1);
+            color: #bf55ff;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .data-table tr:hover {
+            background: rgba(155, 48, 255, 0.05);
+        }
+
+        .device-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .device-pc {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+        }
+
+        .device-phone {
+            background: rgba(0, 255, 135, 0.2);
+            color: #00ff87;
+        }
+
+        .device-tablet {
+            background: rgba(255, 191, 0, 0.2);
+            color: #ffbf00;
+        }
+
+        .action-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .action-add {
+            background: rgba(0, 255, 135, 0.2);
+            color: #00ff87;
+        }
+
+        .clear-btn {
+            padding: 12px 25px;
+            background: rgba(255, 0, 100, 0.2);
+            border: 2px solid rgba(255, 0, 100, 0.5);
+            border-radius: 15px;
+            color: #ff4d8d;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .clear-btn:hover {
+            background: rgba(255, 0, 100, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .data-table {
+                font-size: 0.85rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="bg-grid"></div>
+    </div>
+
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-box">
+            <div class="login-icon">🔐</div>
+            <h1 class="login-title">DIX_SHOP ADMIN</h1>
+            <input type="password" class="login-input" id="passwordInput" placeholder="Введите пароль">
+            <button class="login-btn" onclick="checkPassword()">Войти</button>
+            <p class="error-msg" id="errorMsg">❌ Неверный пароль!</p>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="container dashboard" id="dashboard">
+        <div class="header">
+            <h1>🔐 DIX_SHOP | Админ-панель</h1>
+            <button class="logout-btn" onclick="logout()">Выйти</button>
+        </div>
+
+        <!-- Вкладки -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('overview')">📊 Обзор</button>
+            <button class="tab-btn" onclick="switchTab('visits')">👁️ Визиты</button>
+            <button class="tab-btn" onclick="switchTab('cart')">🛒 Корзина</button>
+            <button class="tab-btn" onclick="switchTab('chats')">💬 Чаты</button>
+            <button class="tab-btn" onclick="switchTab('export')">💾 Экспорт</button>
+        </div>
+
+        <!-- Вкладка: Обзор -->
+        <div class="tab-content active" id="overview">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value" id="totalVisits">0</div>
+                    <div class="stat-label">Всего визитов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🛒</div>
+                    <div class="stat-value" id="totalCartActions">0</div>
+                    <div class="stat-label">Действий с корзиной</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-value" id="totalRevenue">0 ₽</div>
+                    <div class="stat-label">Общая сумма</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📱</div>
+                    <div class="stat-value" id="mobileVisits">0</div>
+                    <div class="stat-label">С телефонов</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка: Визиты -->
+        <div class="tab-content" id="visits">
+            <div class="section">
+                <h2 class="section-title">
+                    <span>👁️</span> Визиты пользователей
+                </h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Время</th>
+                            <th>Устройство</th>
+                            <th>Браузер</th>
+                            <th>Экран</th>
+                            <th>Язык</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visitsTable"></tbody>
+                </table>
+                <button class="clear-btn" onclick="clearVisits()">🗑️ Очистить визиты</button>
+            </div>
+        </div>
+
+        <!-- Вкладка: Корзина -->
+        <div class="tab-content" id="cart">
+            <div class="section">
+                <h2 class="section-title">
+                    <span>🛒</span> Действия с корзиной
+                </h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Время</th>
+                            <th>Действие</th>
+                            <th>Товары</th>
+                            <th>Сумма</th>
+                            <th>Устройство</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cartActionsTable"></tbody>
+                </table>
+                <button class="clear-btn" onclick="clearCartActions()">🗑️ Очистить действия</button>
+            </div>
+        </div>
+
+        <!-- Вкладка: Чаты -->
+        <div class="tab-content" id="chats">
+            <div class="section">
+                <h2 class="section-title">
+                    <span>💬</span> Чаты с покупателями
+                    <span id="unreadChatsCount" style="background: rgba(255, 0, 100, 0.2); color: #ff4d8d; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; margin-left: 15px;">0 новых</span>
+                </h2>
+                <div id="chatsList" style="display: flex; flex-direction: column; gap: 15px;"></div>
+            </div>
+            
+            <!-- Окно чата -->
+            <div id="adminChatWindow" class="tab-content" style="display: none;">
+                <div class="section">
+                    <h2 class="section-title">
+                        <button onclick="closeAdminChat()" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; margin-right: 10px;">←</button>
+                        <span id="chatUserName">Покупатель</span>
+                        <span id="chatUserTotal" style="color: #00ff87; margin-left: 15px;"></span>
+                        <span id="chatUserStatus" style="background: rgba(0, 255, 135, 0.2); color: #00ff87; padding: 5px 12px; border-radius: 15px; font-size: 0.85rem; margin-left: 15px;">Активен</span>
+                    </h2>
+                    <div id="adminChatMessages" style="min-height: 400px; max-height: 500px; overflow-y: auto; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 15px; margin-bottom: 20px;"></div>
+                    <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; gap: 10px; flex: 1;">
+                            <input type="text" id="adminChatInput" placeholder="Введите сообщение..." style="flex: 1; padding: 15px; background: rgba(255,255,255,0.05); border: 2px solid rgba(155, 48, 255, 0.3); border-radius: 15px; color: #fff; font-size: 1rem;" onkeypress="if(event.key==='Enter') sendAdminMessage()">
+                            <button onclick="sendAdminMessage()" style="padding: 15px 30px; background: linear-gradient(135deg, #9b30ff, #6a00ff); border: none; border-radius: 15px; color: #fff; font-weight: 700; cursor: pointer; font-size: 1rem;">➤ Отправить</button>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="toggleChatStatus()" id="toggleChatBtn" style="padding: 15px 25px; background: rgba(255, 0, 100, 0.2); border: 2px solid rgba(255, 0, 100, 0.5); border-radius: 15px; color: #ff4d8d; font-weight: 700; cursor: pointer; font-size: 0.9rem;">🔒 Закрыть чат</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка: Экспорт -->
+        <div class="tab-content" id="export">
+            <div class="section">
+                <h2 class="section-title">
+                    <span>💾</span> Экспорт данных
+                </h2>
+                <p style="color: #888; margin-bottom: 20px;">
+                    Скачайте все данные в JSON файле для сохранения или анализа:
+                </p>
+                <button class="clear-btn" onclick="exportData()" style="background: rgba(0, 255, 135, 0.2); border-color: rgba(0, 255, 135, 0.5); color: #00ff87;">
+                    📥 Скачать все данные
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Пароль администратора
+        const ADMIN_PASSWORD = 'dix_shop_66344_dix';
+
+        // Проверка авторизации
+        function checkAuth() {
+            const isAuth = localStorage.getItem('dix_admin_auth');
+            if (isAuth === 'true') {
+                showDashboard();
+            }
+        }
+
+        // Проверка пароля
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === ADMIN_PASSWORD) {
+                localStorage.setItem('dix_admin_auth', 'true');
+                showDashboard();
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
+            }
+        }
+
+        // Выход
+        function logout() {
+            localStorage.removeItem('dix_admin_auth');
+            location.reload();
+        }
+
+        // Показать панель
+        function showDashboard() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            loadStats();
+        }
+
+        // Загрузка статистики
+        function loadStats() {
+            const visits = JSON.parse(localStorage.getItem('dix_visits') || '[]');
+            const cartActions = JSON.parse(localStorage.getItem('dix_cart_actions') || '[]');
+
+            // Общие stats
+            document.getElementById('totalVisits').textContent = visits.length;
+            document.getElementById('totalCartActions').textContent = cartActions.length;
+            
+            // Считаем общую сумму из всех действий add
+            let totalRevenue = 0;
+            cartActions.forEach(action => {
+                if (action.action === 'add' && action.total) {
+                    totalRevenue += action.total;
+                }
+            });
+            document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString() + ' ₽';
+
+            const mobileCount = visits.filter(v => v.device === 'Телефон' || v.device === 'Планшет').length;
+            document.getElementById('mobileVisits').textContent = mobileCount;
+
+            // Таблица визитов
+            const visitsTable = document.getElementById('visitsTable');
+            if (visits.length === 0) {
+                visitsTable.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="empty-icon">📭</div><p>Нет визитов</p></td></tr>';
+            } else {
+                visitsTable.innerHTML = visits.slice().reverse().map(visit => {
+                    let deviceClass = 'pc';
+                    if (visit.device === 'Телефон') deviceClass = 'phone';
+                    else if (visit.device === 'Планшет') deviceClass = 'tablet';
+                    
+                    return `
+                        <tr>
+                            <td>${new Date(visit.timestamp).toLocaleString('ru-RU')}</td>
+                            <td><span class="device-badge device-${deviceClass}">${visit.device}</span></td>
+                            <td>${visit.browser || 'Unknown'}</td>
+                            <td>${visit.screen || 'N/A'}</td>
+                            <td>${visit.language || 'N/A'}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Таблица действий корзины
+            const cartTable = document.getElementById('cartActionsTable');
+            if (cartActions.length === 0) {
+                cartTable.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="empty-icon">📭</div><p>Нет действий</p></td></tr>';
+            } else {
+                cartTable.innerHTML = cartActions.slice().reverse().map(action => {
+                    let deviceClass = 'pc';
+                    if (action.device === 'Телефон') deviceClass = 'phone';
+                    else if (action.device === 'Планшет') deviceClass = 'tablet';
+                    
+                    const itemsList = Array.isArray(action.items) ? action.items.map(i => i.name).join(', ') : 'N/A';
+                    
+                    return `
+                        <tr>
+                            <td>${new Date(action.timestamp).toLocaleString('ru-RU')}</td>
+                            <td><span class="action-badge action-add">${action.action === 'add' ? '➕ Добавление' : action.action}</span></td>
+                            <td>${itemsList}</td>
+                            <td>${(action.total || 0).toLocaleString()} ₽</td>
+                            <td><span class="device-badge device-${deviceClass}">${action.device || 'Unknown'}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Очистка визитов
+        function clearVisits() {
+            if (confirm('Удалить всю историю визитов?')) {
+                localStorage.removeItem('dix_visits');
+                loadStats();
+            }
+        }
+
+        // Очистка действий
+        function clearCartActions() {
+            if (confirm('Удалить всю историю действий с корзиной?')) {
+                localStorage.removeItem('dix_cart_actions');
+                loadStats();
+            }
+        }
+
+        // Экспорт данных
+        function exportData() {
+            const data = {
+                visits: JSON.parse(localStorage.getItem('dix_visits') || '[]'),
+                cartActions: JSON.parse(localStorage.getItem('dix_cart_actions') || '[]'),
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dix-shop-data-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Enter для входа
+        document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkPassword();
+        });
+
+        // Проверка при загрузке
+        checkAuth();
+
+        // Переключение вкладок
+        function switchTab(tabName) {
+            // Убираем active у всех кнопок и контента
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Добавляем active нужной кнопке и контенту
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+
+            // Обновляем статистику если перешли на вкладку
+            if (tabName === 'visits' || tabName === 'cart') {
+                loadStats();
+            }
+            
+            // Загружаем чаты если перешли на вкладку чатов
+            if (tabName === 'chats') {
+                loadChatsList();
+            }
+        }
+
+        // Загрузка списка чатов
+        function loadChatsList() {
+            const chats = JSON.parse(localStorage.getItem('dix_chats') || '[]');
+            const chatsList = document.getElementById('chatsList');
+            
+            // Считаем непрочитанные
+            const unreadCount = chats.reduce((sum, chat) => sum + (chat.unread || 0), 0);
+            document.getElementById('unreadChatsCount').textContent = unreadCount + ' новых';
+            
+            if (chats.length === 0) {
+                chatsList.innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><p>Нет чатов</p></div>';
+                return;
+            }
+            
+            chatsList.innerHTML = chats.slice().reverse().map(chat => {
+                const lastMessage = chat.messages[chat.messages.length - 1];
+                const isClosed = chat.status === 'closed';
+                
+                return `
+                <div onclick="openAdminChat('${chat.id}')" style="background: rgba(155, 48, 255, 0.1); border: 2px solid ${isClosed ? 'rgba(255, 0, 100, 0.5)' : chat.unread > 0 ? 'rgba(255, 0, 100, 0.7)' : 'rgba(155, 48, 255, 0.3)'}; border-radius: 15px; padding: 20px; cursor: pointer; transition: all 0.3s ease; position: relative;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 30px rgba(155, 48, 255, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    ${isClosed ? '<div style="position: absolute; top: 10px; right: 10px; background: rgba(255, 0, 100, 0.3); color: #ff4d8d; padding: 5px 12px; border-radius: 15px; font-size: 0.75rem; font-weight: 700;">🔒 ЗАКРЫТ</div>' : ''}
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="font-weight: 700; color: #fff; font-size: 1.1rem;">👤 ${chat.userName}</div>
+                        ${chat.unread > 0 && !isClosed ? '<span style="background: linear-gradient(135deg, #ff006e, #ff4d8d); color: #fff; padding: 5px 12px; border-radius: 15px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 0 15px rgba(255, 0, 110, 0.5);">' + chat.unread + ' новых 💬</span>' : ''}
+                    </div>
+                    <div style="color: #888; font-size: 0.9rem; margin-bottom: 10px;">🛒 ${chat.items.map(i => i.name).join(', ')}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="color: #00ff87; font-weight: 700; font-size: 1.1rem;">💰 ${chat.total.toLocaleString()} ₽</div>
+                        <div style="color: #666; font-size: 0.8rem;">🕐 ${new Date(chat.created).toLocaleString('ru-RU', {hour: '2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'})}</div>
+                    </div>
+                    ${lastMessage ? `
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(155, 48, 255, 0.2);">
+                            <div style="color: #666; font-size: 0.8rem; margin-bottom: 5px;">Последнее сообщение:</div>
+                            <div style="color: ${lastMessage.from === 'admin' ? '#00ff87' : lastMessage.from === 'user' ? '#bf55ff' : '#888'}; font-size: 0.9rem; font-style: ${lastMessage.from === 'admin' ? 'italic' : 'normal'};">
+                                ${lastMessage.from === 'admin' ? '👤 Вы: ' : lastMessage.from === 'user' ? '👤 Покупатель: ' : '⚙️ '} ${lastMessage.text.substring(0, 50)}${lastMessage.text.length > 50 ? '...' : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `}).join('');
+        }
+
+        // Открытие чата админа
+        let currentChatId = null;
+        
+        function openAdminChat(chatId) {
+            currentChatId = chatId;
+            const chats = JSON.parse(localStorage.getItem('dix_chats') || '[]');
+            const chat = chats.find(c => c.id === chatId);
+            
+            if (!chat) return;
+            
+            // Скрываем список, показываем чат
+            document.getElementById('chatsList').parentElement.style.display = 'none';
+            document.getElementById('adminChatWindow').style.display = 'block';
+            
+            // Устанавливаем заголовок
+            document.getElementById('chatUserName').textContent = chat.userName;
+            document.getElementById('chatUserTotal').textContent = chat.total.toLocaleString() + ' ₽';
+            
+            // Показываем статус
+            updateChatStatusUI(chat.status || 'active');
+            
+            // Сбрасываем непрочитанные
+            const chatIndex = chats.findIndex(c => c.id === chatId);
+            chats[chatIndex].unread = 0;
+            localStorage.setItem('dix_chats', JSON.stringify(chats));
+            loadChatsList();
+            
+            // Загружаем сообщения
+            loadAdminChatMessages(chatId);
+        }
+
+        function closeAdminChat() {
+            currentChatId = null;
+            document.getElementById('adminChatWindow').style.display = 'none';
+            document.getElementById('chatsList').parentElement.style.display = 'block';
+            loadChatsList();
+        }
+
+        function loadAdminChatMessages(chatId) {
+            const chats = JSON.parse(localStorage.getItem('dix_chats') || '[]');
+            const chat = chats.find(c => c.id === chatId);
+            
+            if (!chat) return;
+            
+            const messagesHTML = chat.messages.map(msg => {
+                const isAdmin = msg.from === 'admin';
+                const isSystem = msg.from === 'system';
+                const isUser = msg.from === 'user';
+                
+                if (isSystem) {
+                    return `<div style="text-align: center; color: #888; font-size: 0.85rem; margin: 10px 0; padding: 10px; background: rgba(155, 48, 255, 0.1); border-radius: 10px;">${msg.text}</div>`;
+                }
+                
+                return `
+                    <div style="margin: 10px 0; text-align: ${isAdmin ? 'right' : 'left'};">
+                        <div style="display: inline-block; padding: 12px 18px; background: ${isAdmin ? 'linear-gradient(135deg, #00ff88, #00d4ff)' : 'rgba(255,255,255,0.1)'}; border-radius: ${isAdmin ? '20px 20px 0 20px' : '20px 20px 20px 0'}; color: #fff; max-width: 80%;">
+                            ${msg.text}
+                        </div>
+                        <div style="font-size: 0.75rem; color: #666; margin-top: 5px;">${new Date(msg.timestamp).toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'})}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('adminChatMessages').innerHTML = messagesHTML;
+            document.getElementById('adminChatMessages').scrollTop = document.getElementById('adminChatMessages').scrollHeight;
+        }
+
+        function sendAdminMessage() {
+            const input = document.getElementById('adminChatInput');
+            const text = input.value.trim();
+            
+            if (!text || !currentChatId) return;
+            
+            const chats = JSON.parse(localStorage.getItem('dix_chats') || '[]');
+            const chatIndex = chats.findIndex(c => c.id === currentChatId);
+            
+            if (chatIndex === -1) return;
+            
+            // Добавляем сообщение от админа
+            chats[chatIndex].messages.push({
+                id: Date.now(),
+                from: 'admin',
+                text: text,
+                timestamp: new Date().toISOString()
+            });
+            
+            localStorage.setItem('dix_chats', JSON.stringify(chats));
+            
+            input.value = '';
+            loadAdminChatMessages(currentChatId);
+        }
+
+        // Закрыть/открыть чат
+        function toggleChatStatus() {
+            if (!currentChatId) return;
+            
+            const chats = JSON.parse(localStorage.getItem('dix_chats') || '[]');
+            const chatIndex = chats.findIndex(c => c.id === currentChatId);
+            
+            if (chatIndex === -1) return;
+            
+            // Переключаем статус
+            const isClosed = chats[chatIndex].status === 'closed';
+            chats[chatIndex].status = isClosed ? 'active' : 'closed';
+            
+            // Добавляем системное сообщение
+            chats[chatIndex].messages.push({
+                id: Date.now(),
+                from: 'system',
+                text: isClosed ? 'Чат был reopened администратором' : 'Чат был закрыт администратором',
+                timestamp: new Date().toISOString()
+            });
+            
+            localStorage.setItem('dix_chats', JSON.stringify(chats));
+            
+            // Обновляем интерфейс
+            updateChatStatusUI(chats[chatIndex].status);
+            loadAdminChatMessages(currentChatId);
+        }
+
+        function updateChatStatusUI(status) {
+            const statusEl = document.getElementById('chatUserStatus');
+            const toggleBtn = document.getElementById('toggleChatBtn');
+            
+            if (status === 'closed') {
+                statusEl.textContent = 'Закрыт';
+                statusEl.style.background = 'rgba(255, 0, 100, 0.2)';
+                statusEl.style.color = '#ff4d8d';
+                toggleBtn.textContent = '🔓 Открыть чат';
+                toggleBtn.style.background = 'rgba(0, 255, 135, 0.2)';
+                toggleBtn.style.borderColor = 'rgba(0, 255, 135, 0.5)';
+                toggleBtn.style.color = '#00ff87';
+            } else {
+                statusEl.textContent = 'Активен';
+                statusEl.style.background = 'rgba(0, 255, 135, 0.2)';
+                statusEl.style.color = '#00ff87';
+                toggleBtn.textContent = '🔒 Закрыть чат';
+                toggleBtn.style.background = 'rgba(255, 0, 100, 0.2)';
+                toggleBtn.style.borderColor = 'rgba(255, 0, 100, 0.5)';
+                toggleBtn.style.color = '#ff4d8d';
+            }
+        }
+
+        // Авто-обновление чатов (проверяем каждые 2 секунды)
+        let adminLastChatUpdate = 0;
+        
+        setInterval(() => {
+            // Если открыт чат - проверяем новые сообщения
+            if (currentChatId) {
+                const chats = JSON.parse(localStorage.getItem('dix_chats') || '[]');
+                const chat = chats.find(c => c.id === currentChatId);
+                
+                if (chat && chat.messages) {
+                    const lastMsgTime = chat.messages[chat.messages.length - 1]?.timestamp;
+                    const lastMsgFromAdmin = chat.messages[chat.messages.length - 1]?.from === 'admin';
+                    
+                    if (lastMsgTime && lastMsgTime !== adminLastChatUpdate && !lastMsgFromAdmin) {
+                        adminLastChatUpdate = lastMsgTime;
+                        loadAdminChatMessages(currentChatId);
+                    }
+                }
+            }
+            
+            // Обновляем счётчик непрочитанных если на вкладке чатов
+            const chatsTab = document.getElementById('chats');
+            if (chatsTab && chatsTab.classList.contains('active')) {
+                loadChatsList();
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
