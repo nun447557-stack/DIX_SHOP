@@ -2005,7 +2005,8 @@
                     timestamp: new Date().toISOString()
                 }],
                 unread: 0,
-                status: 'active' // active, closed
+                status: 'active',
+                timestamp: Date.now()
             };
             
             // Сохраняем в localStorage
@@ -2013,6 +2014,26 @@
             chats.push(chatData);
             localStorage.setItem('dix_chats', JSON.stringify(chats));
             localStorage.setItem('dix_current_chat', chatId);
+            
+            // ОТПРАВЛЯЕМ В FIREBASE
+            if (window.firebaseReady && window.db) {
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js")
+                    .then(({ addDoc, collection }) => {
+                        addDoc(collection(window.db, "chats"), {
+                            chatId: chatId,
+                            userId: userId,
+                            userName: userName,
+                            items: chatData.items,
+                            total: total,
+                            status: 'active',
+                            createdAt: new Date()
+                        }).then(() => {
+                            console.log('✅ Чат сохранён в Firebase!');
+                        }).catch((error) => {
+                            console.error('❌ Ошибка Firebase:', error);
+                        });
+                    });
+            }
             
             // Очищаем временные данные
             localStorage.removeItem('dix_checkout_items');
@@ -2557,6 +2578,33 @@
             </div>
         </div>
     </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase конфигурация
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDbyqbb6XbRmanNvuk9Sg99ni6YspA88s",
+            authDomain: "dixshop.firebaseapp.com",
+            projectId: "dixshop",
+            storageBucket: "dixshop.firebasestorage.app",
+            messagingSenderId: "384996550835",
+            appId: "1:384996550835:web:1ac4c2f8654f4b14bf68c6",
+            measurementId: "G-RPH6941TKH"
+        };
+
+        // Инициализация Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Делаем db доступным глобально
+        window.db = db;
+        window.firebaseReady = true;
+
+        console.log('✅ Firebase подключен!');
+    </script>
 
     <!-- Privacy Policy Modal -->
     <div class="modal-overlay" id="privacyOverlay">
